@@ -35,9 +35,9 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile', [\App\Http\Controllers\ProfileController::class, 'edit'])->name('profile.edit');
+    Route::put('/profile', [\App\Http\Controllers\ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [\App\Http\Controllers\ProfileController::class, 'updatePassword'])->name('profile.updatePassword');
 });
 
 Route::middleware(['auth', 'role:Admin,LPM'])->prefix('standar')->name('standar.')->group(function () {
@@ -118,12 +118,6 @@ Route::middleware(['auth', 'role:Admin,LPM,Pimpinan'])->prefix('laporan')->name(
     Route::get('/rtl/export', [\App\Http\Controllers\LaporanController::class, 'exportRtl'])->name('export.rtl');
 });
 
-// Profil Management
-Route::middleware(['auth'])->prefix('profil')->name('profil.')->group(function () {
-    Route::get('/', [\App\Http\Controllers\ProfilController::class, 'edit'])->name('edit');
-    Route::put('/update', [\App\Http\Controllers\ProfilController::class, 'update'])->name('update');
-    Route::put('/password', [\App\Http\Controllers\ProfilController::class, 'updatePassword'])->name('updatePassword');
-});
 
 // Periode Management
 Route::middleware(['auth', 'role:Admin'])->prefix('periode')->name('periode.')->group(function () {
