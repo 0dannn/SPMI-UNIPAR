@@ -102,11 +102,44 @@
                     
                     <!-- Right Menu -->
                     <div class="flex items-center space-x-4">
-                        <!-- Notification Bell -->
-                        <button class="relative p-2 text-gray-500 hover:text-gray-700 transition-colors focus:outline-none">
-                            <span class="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm ring-2 ring-white">3</span>
-                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
-                        </button>
+                        <!-- Notification Dropdown -->
+                        <div class="relative" x-data="{ notifOpen: false }">
+                            @php
+                                $unreadNotifsCount = \App\Models\Notifikasi::where('user_id', auth()->id())->where('is_read', false)->count();
+                                $latestNotifs = \App\Models\Notifikasi::where('user_id', auth()->id())->latest()->take(5)->get();
+                            @endphp
+                            <button @click="notifOpen = !notifOpen" @click.away="notifOpen = false" class="relative p-2 text-gray-500 hover:text-gray-700 transition-colors focus:outline-none">
+                                @if($unreadNotifsCount > 0)
+                                <span class="absolute top-1 right-1 flex items-center justify-center w-4 h-4 text-[10px] font-bold text-white bg-red-500 rounded-full shadow-sm ring-2 ring-white">{{ $unreadNotifsCount > 9 ? '9+' : $unreadNotifsCount }}</span>
+                                @endif
+                                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"></path></svg>
+                            </button>
+                            
+                            <!-- Dropdown Menu -->
+                            <div x-show="notifOpen" x-transition.opacity style="display: none;" class="absolute right-0 mt-3 w-80 bg-white rounded-lg shadow-xl py-2 ring-1 ring-black ring-opacity-5 z-50">
+                                <div class="px-4 py-2 border-b border-gray-100 flex justify-between items-center">
+                                    <h3 class="text-sm font-bold text-gray-900">Notifikasi</h3>
+                                    @if($unreadNotifsCount > 0)
+                                    <form action="{{ route('notifikasi.markAllRead') }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="text-xs text-blue-600 hover:text-blue-800 font-medium">Tandai semua dibaca</button>
+                                    </form>
+                                    @endif
+                                </div>
+                                <div class="max-h-64 overflow-y-auto">
+                                    @forelse($latestNotifs as $notif)
+                                        <div class="px-4 py-3 border-b border-gray-50 hover:bg-gray-50 transition-colors {{ !$notif->is_read ? 'bg-blue-50/50' : '' }}">
+                                            <p class="text-sm font-semibold text-gray-800 mb-1">{{ $notif->title }}</p>
+                                            <p class="text-xs text-gray-600 mb-1 line-clamp-2">{{ $notif->message }}</p>
+                                            <p class="text-[10px] text-gray-400">{{ $notif->created_at->diffForHumans() }}</p>
+                                        </div>
+                                    @empty
+                                        <div class="px-4 py-6 text-center text-gray-500 text-sm">Belum ada notifikasi baru.</div>
+                                    @endforelse
+                                </div>
+                                <a href="{{ route('notifikasi.index') }}" class="block px-4 py-2 text-xs text-center text-gray-700 bg-gray-50 hover:bg-gray-100 hover:text-blue-600 transition-colors font-medium rounded-b-lg">Lihat Semua Notifikasi</a>
+                            </div>
+                        </div>
                         
                         <!-- Profile Dropdown -->
                         <div class="relative">
